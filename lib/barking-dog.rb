@@ -1,0 +1,3 @@
+module BarkingDog
+  # Your code goes here...
+end
