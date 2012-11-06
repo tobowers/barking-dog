@@ -15,7 +15,8 @@ Gem::Specification.new do |s|
   s.required_rubygems_version = ">= 1.3.6"
   s.rubyforge_project         = "barking-dog"
 
-  s.add_dependency("dcell") #TODO: explicit version
+  s.add_dependency("celluloid")
+  s.add_dependency("celluloid-zmq")
 
   s.add_development_dependency "bundler", ">= 1.0.0.rc.5"
   s.add_development_dependency "rspec", "~> 2.11.0"
