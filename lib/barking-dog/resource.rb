@@ -1,3 +1,5 @@
+require 'hashie'
+
 module BarkingDog
   class Resource
     include Celluloid
@@ -19,9 +21,10 @@ module BarkingDog
     end
 
     attr_accessor :name
-    attr_reader :machine
-    def initialize(name)
+    attr_reader :machine, :options
+    def initialize(name, opts = {})
       @name = name
+      @options = Hashie::Mash.new(opts)
       @machine = Machine.new
     end
 

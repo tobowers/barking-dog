@@ -17,9 +17,12 @@ Gem::Specification.new do |s|
 
   s.add_dependency("celluloid")
   s.add_dependency("celluloid-zmq")
+  s.add_dependency("active_support")
+  s.add_dependency("hashie")
 
   s.add_development_dependency "bundler", ">= 1.0.0.rc.5"
   s.add_development_dependency "rspec", "~> 2.11.0"
+  s.add_development_dependency "debugger"
 
 
   s.files        = `git ls-files`.split("\n")
