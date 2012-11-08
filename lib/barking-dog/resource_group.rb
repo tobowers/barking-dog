@@ -6,7 +6,9 @@ module BarkingDog
 
     class_attribute :check_period
     class_attribute :resource_class
+
     self.resource_class = BarkingDog::Resource
+    self.check_period = 30
 
     attr_accessor :name
     attr_reader :resources, :configuration, :checks, :stopped
@@ -22,6 +24,19 @@ module BarkingDog
 
     def stop
       @stopped = true
+    end
+
+    def run
+      @stopped = false
+      checks.each_pair do |check_class, check_options|
+        resources.each do |resource|
+          check_class.new_link(resource, check_options).async.do_check_with_callback(Celluloid::Actor.current)
+        end
+      end
+    end
+
+    def check_report_handler(event)
+      #puts "report handler received: #{event.inspect}"
     end
 
     def act_on_configuration

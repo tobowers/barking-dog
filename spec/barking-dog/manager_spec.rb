@@ -28,14 +28,14 @@ describe BarkingDog::Manager do
     class IsEnvironmentVariableSet < BarkingDog::Check
       def do_check
         if ENV['dofuckup']
-          BarkingDog::Event.new({
+          [false, {
               state: :unhealthy,
               message: "you fucked up"
-          })
+          }]
         else
-          BarkingDog::Event.new({
-              state: :healthy,
-          })
+          [true, {
+              state:healthy
+          }]
         end
       end
     end

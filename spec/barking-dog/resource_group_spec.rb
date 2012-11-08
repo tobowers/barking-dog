@@ -20,6 +20,42 @@ describe BarkingDog::ResourceGroup do
     @resource_group.stopped.should be_true
   end
 
+  describe "#run" do
+    before(:all) do
+      class NothingCheck < BarkingDog::Check
+        def do_check
+          [true, {}]
+        end
+      end
+
+      @config = {
+          resources: {
+              coke_one: {
+                foo: 'bar'
+              },
+              coke_two: {
+                foo: 'baz'
+              }
+          },
+          checks: [:nothing_check]
+      }
+    end
+
+    before do
+      @resource_group.terminate
+      @resource_group = BarkingDog::ResourceGroup.new("default", @config)
+    end
+
+    after do
+      @resource_group.stop
+    end
+
+    it "should do stuff" do
+      @resource_group.run
+    end
+
+  end
+
   describe "#checks" do
     before do
       @check = BarkingDog::Check.new("default")
@@ -78,9 +114,7 @@ describe BarkingDog::ResourceGroup do
       before(:all) do
         class NothingCheck < BarkingDog::Check
           def do_check
-            BarkingDog::Event.new({
-                state: :healthy,
-            })
+            true
           end
         end
       end
@@ -110,6 +144,7 @@ describe BarkingDog::ResourceGroup do
 
     describe "with default classes" do
       before do
+        @resource_group.terminate
         @resource_group = BarkingDog::ResourceGroup.new("cokes", @config)
       end
 
@@ -133,6 +168,7 @@ describe BarkingDog::ResourceGroup do
       end
 
       before do
+        @resource_group.terminate
         @resource_group = CustomResourceGroup.new("customResourceGroup", @config)
       end
 
