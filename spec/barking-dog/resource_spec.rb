@@ -1,15 +1,19 @@
 require 'spec_helper'
 
 describe BarkingDog::Resource do
+  before do
+    @resource =  BarkingDog::Resource.new("test")
+  end
+
+  after do
+    @resource.terminate
+  end
 
   it "should take a name" do
-    BarkingDog::Resource.new("test").name.should == "test"
+    @resource.name.should == "test"
   end
 
   describe "state changes" do
-    before do
-      @resource = BarkingDog::Resource.new("test")
-    end
 
     it "should default to initializing" do
       @resource.state.should == :initializing

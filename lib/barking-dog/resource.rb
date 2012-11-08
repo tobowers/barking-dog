@@ -10,11 +10,11 @@ module BarkingDog
       default_state :initializing
 
       state :initializing, :to => :healthy do
-        puts "transitioned to healthy"
+        #puts "transitioned to healthy"
       end
 
       state :healthy, :to => [:unhealthy] do
-        puts "transitioned from healthy to unhealthy"
+        #puts "transitioned from healthy to unhealthy"
       end
 
       state :done

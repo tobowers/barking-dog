@@ -6,8 +6,37 @@ describe BarkingDog::ResourceGroup do
     @resource_group = BarkingDog::ResourceGroup.new("TestGroup")
   end
 
+  after do
+    @resource_group.terminate if @resource_group
+  end
+
   it "should have a name" do
     @resource_group.name.should == "TestGroup"
+  end
+
+  it "should stop" do
+    @resource_group.stopped.should be_false
+    @resource_group.stop
+    @resource_group.stopped.should be_true
+  end
+
+  describe "#checks" do
+    before do
+      @check = BarkingDog::Check.new("default")
+    end
+
+    it "should add checks" do
+      @resource_group.add_check(@check, {cool: true})
+      @resource_group.checks[@check].should == {cool: true}
+    end
+
+    it "should remove checks" do
+      @resource_group.add_check(@check)
+      @resource_group.checks.keys.length.should == 1
+      @resource_group.remove_check(@check)
+      @resource_group.checks.should be_empty
+    end
+
   end
 
   describe "#resources" do
@@ -34,13 +63,49 @@ describe BarkingDog::ResourceGroup do
   describe "configuration" do
     before do
       @config = {
-          coke_one: {
-            foo: 'bar'
-          },
-          coke_two: {
-            foo: 'baz'
+          resources: {
+              coke_one: {
+                foo: 'bar'
+              },
+              coke_two: {
+                foo: 'baz'
+              }
           }
       }
+    end
+
+    describe "checks" do
+      before(:all) do
+        class NothingCheck < BarkingDog::Check
+          def do_check
+            BarkingDog::Event.new({
+                state: :healthy,
+            })
+          end
+        end
+      end
+
+      before do
+        @config[:checks] = [:nothing_check]
+      end
+
+      it "should figure out check class from symbol" do
+        @resource_group = BarkingDog::ResourceGroup.new("checks", @config)
+        @resource_group.checks.keys.first.should == NothingCheck
+      end
+
+      it "should use an actual class" do
+        @config[:checks] = [NothingCheck]
+        @resource_group = BarkingDog::ResourceGroup.new("checks", @config)
+        @resource_group.checks.keys.first.should == NothingCheck
+      end
+
+      it "should use a hash to pass options" do
+        @config[:checks] = [{:name => :nothing_check, :options => {cool: true}}]
+        @resource_group = BarkingDog::ResourceGroup.new("checks", @config)
+        @resource_group.checks[NothingCheck].should == {cool: true}
+      end
+
     end
 
     describe "with default classes" do

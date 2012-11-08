@@ -23,17 +23,22 @@ module BarkingDog
       @stopped = false
       @resource_groups = Hashie::Mash.new
       act_on_configuration
-      Celluloid::Actor[:manager] = actor
+      Celluloid::Actor[:manager] = Celluloid::Actor.current
     end
 
     def act_on_configuration
       config.groups.each_pair do |name, resource_group_config|
-        @resource_groups[name] = name.camlize.constantize.new(resource_group_config)
+        @resource_groups[name] = name.camelize.constantize.new_link(resource_group_config)
       end
     end
 
     def stop
       @stopped = true
+      @resource_groups.values.each(&:stop)
+    end
+
+    def run
+
     end
 
 
