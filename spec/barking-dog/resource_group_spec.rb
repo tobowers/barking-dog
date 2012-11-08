@@ -56,10 +56,24 @@ describe BarkingDog::ResourceGroup do
         resource = @resource_group.resources.last
         resource.name.should == :coke_two
         resource.options.foo = 'baz'
+      end
+    end
 
+    describe "with custom classes" do
+      before(:all) do
+        class Coke < BarkingDog::Resource; end
+        class CustomResourceGroup < BarkingDog::ResourceGroup
+          self.resource_class = Coke
+        end
       end
 
+      before do
+        @resource_group = CustomResourceGroup.new("customResourceGroup", @config)
+      end
 
+      it "should make resources of the custom class" do
+        @resource_group.resources.first.should be_a(Coke)
+      end
 
     end
 
