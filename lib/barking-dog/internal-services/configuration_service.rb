@@ -15,6 +15,5 @@ module BarkingDog
       @configuration ||= {}
     end
 
-
   end
 end
