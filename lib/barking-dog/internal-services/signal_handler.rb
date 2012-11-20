@@ -3,7 +3,7 @@ module BarkingDog
 
     def initialize
        Signal.trap("INT") do
-         publish("barking-dog.termination_request")
+         publish("barking-dog.termination_request", :INT)
        end
     end
 

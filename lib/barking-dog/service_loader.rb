@@ -7,7 +7,7 @@ module BarkingDog
   class ServiceLoader < Celluloid::SupervisionGroup
     include Celluloid::Notifications
 
-    class_attribute :global_publisher
+    class_attribute :global_event_publisher
     self.global_event_publisher = GlobalEventPublisher.new
 
     supervise CommandLine, :as => :command_line_handler
@@ -17,16 +17,17 @@ module BarkingDog
     #supervise AnotherActor, :as => :another_actor, :args => [{:start_working_right_now => true}]
     #pool MyWorker, :as => :my_worker_pool, :size => 5
 
-    def initialize(additional_load_paths = [])
+    def initialize
       #TODO: load additional files
       load_internal_services
       subscribe("barking-dog.termination_request", :handle_termination_request)
+      super
     end
 
-    def handle_termination_request()
-      puts 'handling termination request'
-      self.class.global_event_publisher.terminate
-      finalize
+    def handle_termination_request(pattern, args)
+      puts "handling termination request: #{args.inspect}"
+      self.class.global_event_publisher.terminate!
+      terminate
     end
 
     def load_internal_services
