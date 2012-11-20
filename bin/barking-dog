@@ -1,0 +1,18 @@
+#!/usr/bin/env ruby
+
+ROOT_DIR = File.expand_path(File.join(__FILE__, "..", ".."))
+require File.join(ROOT_DIR, "lib/barking-dog")
+
+puts "starting up"
+
+supervisor = BarkingDog::ServiceLoader.run!
+
+BarkingDog::ServiceLoader.publish("barking-dog.command_line", ARGV)
+
+loop do
+
+  # Take five, toplevel supervisor
+  sleep 5 while supervisor.alive?
+
+  Logger.error "!!! Celluloid::SupervisionGroup #{self} crashed. Restarting..."
+end
