@@ -1,0 +1,7 @@
+#!/usr/bin/env ruby
+
+ROOT_DIR = File.expand_path(File.join(__FILE__, "..", ".."))
+require File.join(ROOT_DIR, "lib/barking-dog")
+
+sender = BarkingDog::CommandSender.new
+sender.write(ARGV.join(','))

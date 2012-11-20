@@ -6,7 +6,7 @@ module BarkingDog
     end
 
     def print_event(pattern, args)
-      puts "\nDEBUG EVENT: #{pattern} : #{args.inspect}\n"
+      logger.debug "\nDEBUG EVENT: #{pattern} : #{args.inspect}\n"
     end
 
   end

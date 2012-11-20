@@ -12,4 +12,4 @@ BarkingDog::ServiceLoader.global_event_publisher.publish("barking-dog.command_li
 # Take five, toplevel supervisor
 sleep 1 while supervisor.alive?
 
-Celluloid::Logger.error "!!! supervision group terminated"
+Celluloid::Logger.error "supervision group terminated"

@@ -14,13 +14,29 @@ module BarkingDog
     def initialize
       super
       subscribe("barking-dog.termination_request", :handle_termination_request)
+      subscribe("barking-dog.reload_request", :handle_reload_request)
       load_internal_services
     end
 
     def handle_termination_request(pattern, args)
-      puts "handling termination request: #{args.inspect}"
+      logger.debug "handling termination request: #{args.inspect}"
       self.class.global_event_publisher.terminate!
       terminate
+    end
+
+    def handle_reload_request(pattern, file_name)
+      logger.debug("#{pattern}: #{file_name}")
+      supervision_name = File.basename(file_name, ".*")
+      logger.debug("supervision name: #{supervision_name}")
+      actor = @registry[supervision_name.to_sym]
+      logger.debug("found actor")
+      actor_class = actor.class
+      logger.debug('terminating actor')
+      actor.terminate
+      logger.debug("using ruby 'load' on #{file_name}")
+      load file_name
+      logger.debug('setting up supervision again')
+      supervise_as supervision_name.to_sym, actor_class
     end
 
     def load_internal_services
@@ -35,6 +51,10 @@ module BarkingDog
         end
         supervise_as supervision_name.to_sym, class_name
       end
+    end
+
+    def logger
+      Celluloid::Logger
     end
 
 
