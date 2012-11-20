@@ -1,5 +1,5 @@
 module BarkingDog
-  class SignalHandler < BaseService
+  class SignalHandlerService < BaseService
 
     def initialize
        Signal.trap("INT") do

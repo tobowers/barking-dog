@@ -1,5 +1,5 @@
 module BarkingDog
-  class CommandLine < BaseService
+  class CommandLineService < BaseService
 
     def initialize(*args)
       puts args.inspect

@@ -1,8 +1,5 @@
 module BarkingDog
   INTERNAL_SERVICE_ROOT = File.expand_path(File.join(__FILE__, "..", "internal-services"))
-  %w(command_line signal_handler event_debugger).each do |internal_service|
-    require "#{INTERNAL_SERVICE_ROOT}/#{internal_service}.rb"
-  end
 
   class ServiceLoader < Celluloid::SupervisionGroup
     include Celluloid::Notifications
@@ -10,18 +7,14 @@ module BarkingDog
     class_attribute :global_event_publisher
     self.global_event_publisher = GlobalEventPublisher.new
 
-    supervise CommandLine, :as => :command_line_handler
-    supervise EventDebugger, :as => :event_debugger
-    supervise SignalHandler, :as => :signal_handler
     #supervise MyActor, :as => :my_actor
     #supervise AnotherActor, :as => :another_actor, :args => [{:start_working_right_now => true}]
     #pool MyWorker, :as => :my_worker_pool, :size => 5
 
     def initialize
-      #TODO: load additional files
-      load_internal_services
-      subscribe("barking-dog.termination_request", :handle_termination_request)
       super
+      subscribe("barking-dog.termination_request", :handle_termination_request)
+      load_internal_services
     end
 
     def handle_termination_request(pattern, args)
@@ -31,7 +24,17 @@ module BarkingDog
     end
 
     def load_internal_services
-
+      Dir.glob("#{INTERNAL_SERVICE_ROOT}/*_service.rb") do |file_name|
+        require file_name
+        supervision_name = File.basename(file_name, ".*")
+        begin
+          class_name = "BarkingDog::#{supervision_name.camelize}".constantize
+        rescue NameError => e
+          Celluloid::Logger.error("expected #{file_name} to load #{class_name}")
+          publish "barking-dog.termiation_request"
+        end
+        supervise_as supervision_name.to_sym, class_name
+      end
     end
 
 

@@ -1,5 +1,5 @@
 module BarkingDog
-  class EventDebugger < BaseService
+  class EventDebuggerService < BaseService
 
     def initialize
       subscribe(/.+/, :print_event)

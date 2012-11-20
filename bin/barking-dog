@@ -10,6 +10,6 @@ supervisor = BarkingDog::ServiceLoader.run!
 BarkingDog::ServiceLoader.global_event_publisher.publish("barking-dog.command_line", ARGV)
 
 # Take five, toplevel supervisor
-sleep 5 while supervisor.alive?
+sleep 1 while supervisor.alive?
 
 Celluloid::Logger.error "!!! supervision group terminated"
