@@ -5,7 +5,7 @@ module BarkingDog
     attr_reader :socket, :address
     def initialize
       subscribe("barking-dog.new_configuration_saved", :handle_new_configuration_saved)
-      @address = if Actor[:configuration_service]
+      @address = if config_service = Actor[:configuration_service] and config_service.alive?
                    Actor[:configuration_service].configuration[:command_and_control_address]
                  else
                    DEFAULT_COMMAND_AND_CONTROL_SOCKET
@@ -45,13 +45,20 @@ module BarkingDog
       async.message_loop
     end
 
+    def terminate
+      stop_loop
+      super
+    end
+
     def stop_loop
+      logger.debug("stopping listening loop")
       @listening = false
     end
 
     def message_loop
+      logger.debug("subscribed to #{COMMAND_AND_CONTROL_TOPIC}")
       while @listening
-        async.handle_socket_message(socket.read)
+        handle_socket_message(socket.read)
       end
     end
 

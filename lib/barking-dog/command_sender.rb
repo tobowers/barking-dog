@@ -15,7 +15,13 @@ module BarkingDog
     end
 
     def write(message)
+      logger.debug("sending #{COMMAND_AND_CONTROL_TOPIC} #{message}")
       @socket.send("#{COMMAND_AND_CONTROL_TOPIC} #{message}")
     end
+
+    def logger
+      Celluloid::Logger
+    end
+
   end
 end

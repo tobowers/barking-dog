@@ -16,12 +16,19 @@ module BarkingDog
       subscribe("barking-dog.termination_request", :handle_termination_request)
       subscribe("barking-dog.reload_request", :handle_reload_request)
       load_internal_services
+      @terminated = false
     end
 
     def handle_termination_request(pattern, args)
       logger.debug "handling termination request: #{args.inspect}"
       self.class.global_event_publisher.terminate!
       terminate
+    end
+
+    def terminate
+      @terminated = true
+      signal :terminated
+      super
     end
 
     def handle_reload_request(pattern, file_name)
@@ -51,6 +58,11 @@ module BarkingDog
         end
         supervise_as supervision_name.to_sym, class_name
       end
+    end
+
+    def wait_for_terminated
+      return true if @terminated
+      wait :terminated
     end
 
     def logger

@@ -5,3 +5,4 @@ require File.join(ROOT_DIR, "lib/barking-dog")
 
 sender = BarkingDog::CommandSender.new
 sender.write(ARGV.join(','))
+sender.terminate
