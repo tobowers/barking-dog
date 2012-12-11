@@ -11,7 +11,6 @@ module BarkingDog
                    DEFAULT_COMMAND_AND_CONTROL_SOCKET
                  end
       setup_socket
-      run
     end
 
     def dispatch_command(command, *args)
@@ -37,12 +36,12 @@ module BarkingDog
       @socket = SubSocket.new
       logger.debug("command and control listening to #{address}")
       socket.bind(address)
+      socket.subscribe(COMMAND_AND_CONTROL_TOPIC)
     end
 
     def run
-      socket.subscribe(COMMAND_AND_CONTROL_TOPIC)
       @listening = true
-      async.message_loop
+      message_loop
     end
 
     def terminate
@@ -60,6 +59,7 @@ module BarkingDog
       while @listening
         handle_socket_message(socket.read)
       end
+      logger.debug("stopped message loop on #{COMMAND_AND_CONTROL_TOPIC}")
     end
 
     def handle_socket_message(socket_message)

@@ -7,5 +7,9 @@ module BarkingDog
       Celluloid::Logger
     end
 
+    def ping
+      "pong"
+    end
+
   end
 end

@@ -11,6 +11,7 @@ module BarkingDog
     #supervise AnotherActor, :as => :another_actor, :args => [{:start_working_right_now => true}]
     #pool MyWorker, :as => :my_worker_pool, :size => 5
 
+    attr_reader :registry
     def initialize
       super
       subscribe("barking-dog.termination_request", :handle_termination_request)
@@ -49,14 +50,13 @@ module BarkingDog
     def load_internal_services
       Dir.glob("#{INTERNAL_SERVICE_ROOT}/*_service.rb") do |file_name|
         require file_name
-        supervision_name = File.basename(file_name, ".*")
         begin
-          class_name = "BarkingDog::#{supervision_name.camelize}".constantize
+          klass = "BarkingDog::#{File.basename(file_name, ".*").camelize}".constantize
+          add_service(klass)
         rescue NameError => e
-          Celluloid::Logger.error("expected #{file_name} to load #{class_name}")
+          Celluloid::Logger.error("expected #{file_name} to load #{File.basename(file_name, ".*").camelize}, but raised: #{e.inspect}")
           publish "barking-dog.termiation_request"
         end
-        supervise_as supervision_name.to_sym, class_name
       end
     end
 
@@ -67,6 +67,14 @@ module BarkingDog
 
     def logger
       Celluloid::Logger
+    end
+
+    def add_service(klass, *args, &block)
+      registry_name = klass.name.underscore.to_sym
+      supervise_as registry_name, klass, *args, &block
+      if @registry[registry_name].respond_to?(:run)
+        @registry[registry_name].async.run
+      end
     end
 
 

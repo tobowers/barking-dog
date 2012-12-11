@@ -1,6 +1,5 @@
 module BarkingDog
-  class CommandSender
-    include Celluloid
+  class CommandSender < BaseService
     include Celluloid::ZMQ
 
     def initialize(address = DEFAULT_COMMAND_AND_CONTROL_SOCKET)
@@ -22,6 +21,5 @@ module BarkingDog
     def logger
       Celluloid::Logger
     end
-
   end
 end
