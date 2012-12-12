@@ -17,16 +17,35 @@ module BarkingDog
     #supervise AnotherActor, :as => :another_actor, :args => [{:start_working_right_now => true}]
     #pool MyWorker, :as => :my_worker_pool, :size => 5
 
-    attr_reader :registry, :root_event_path, :event_publisher
+    attr_reader :registry, :event_publisher
+    attr_accessor :root_event_path, :subscriptions
     def initialize
+      @subscriptions = []
       @root_event_path = self.class.root_event_path
       super
       @event_publisher = add_service(EventPublisher)
+      subscribe_to_events
+      load_internal_services
+      @terminated = false
+    end
+
+    def subscribe_to_events
       on("termination_request", :handle_termination_request)
       on("reload_request", :handle_reload_request)
       on("debug_request", :turn_on_event_debugger)
-      load_internal_services
-      @terminated = false
+    end
+
+    # here we dup the old subs, and subscribe to the new ones
+    # so that there's never a time when we're not listening
+    # to any
+    def change_root_event_path(event_path)
+      old_subs = subscriptions.dup
+      self.root_event_path = event_path
+      subscribe_to_events
+      old_subs.each do |sub|
+        unsubscribe(sub)
+      end
+      self.subscriptions = subscriptions - old_subs
     end
 
     def handle_termination_request(pattern, args)
@@ -75,7 +94,7 @@ module BarkingDog
     end
 
     def on(path, meth)
-      subscribe(event_path(path), meth)
+      subscriptions << subscribe(event_path(path), meth)
     end
 
     def trigger(path, *args)

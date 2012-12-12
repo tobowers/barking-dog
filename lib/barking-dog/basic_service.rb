@@ -51,7 +51,7 @@ module BarkingDog
     end
 
     def root_event_path
-      @root_event_path ||= linked_service_loader? ? linked_service_loader.root_event_path : nil
+      linked_service_loader? ? linked_service_loader.root_event_path : nil
     end
 
   private
