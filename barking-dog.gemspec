@@ -15,7 +15,7 @@ Gem::Specification.new do |s|
   s.required_rubygems_version = ">= 1.3.6"
   s.rubyforge_project         = "barking-dog"
 
-  s.add_dependency("celluloid")
+  s.add_dependency("celluloid", ">= 0.12.4")
   s.add_dependency("celluloid-zmq")
   s.add_dependency("active_support")
   s.add_dependency("hashie")
