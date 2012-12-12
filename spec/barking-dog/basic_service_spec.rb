@@ -1,7 +1,13 @@
 require 'spec_helper'
 
 module BarkingDog
-  describe BaseService do
+  describe BasicService do
+
+    before(:all) do
+      class BaseService
+        include BasicService
+      end
+    end
 
     let(:base_service) { BaseService.new }
 

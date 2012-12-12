@@ -1,5 +1,6 @@
 module BarkingDog
-  class CommandSender < BaseService
+  class CommandSender
+    include BarkingDog::BasicService
     include Celluloid::ZMQ
 
     def initialize(address = DEFAULT_COMMAND_AND_CONTROL_SOCKET)

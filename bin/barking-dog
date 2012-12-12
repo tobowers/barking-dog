@@ -7,7 +7,7 @@ puts "starting up"
 
 supervisor = BarkingDog::ServiceLoader.run!
 
-BarkingDog::ServiceLoader.event_publisher.publish("barking-dog.command_line", ARGV)
+BarkingDog::ServiceLoader.event_publisher.trigger("command_line", ARGV)
 
 # Take five, toplevel supervisor
 sleep 1 while supervisor.alive?

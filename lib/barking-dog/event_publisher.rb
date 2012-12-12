@@ -1,5 +1,6 @@
 module BarkingDog
-  class EventPublisher < BaseService
+  class EventPublisher
+    include BasicService
 
     def trigger(*args, &block)
       #always root trigger from here

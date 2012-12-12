@@ -1,5 +1,6 @@
 #this isn't great, uses a spin lock - but it's a spec helper
-class EventReceiver < BarkingDog::BaseService
+class EventReceiver
+  include BarkingDog::BasicService
 
   attr_accessor :events
   def initialize

@@ -1,5 +1,6 @@
 module BarkingDog
-  class SignalHandlerService < BaseService
+  class SignalHandlerService
+    include BarkingDog::BasicService
 
     def initialize
        logger.debug("trapping INT signal")

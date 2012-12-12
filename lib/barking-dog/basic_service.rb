@@ -1,9 +1,11 @@
 module BarkingDog
-  class BaseService
-    include Celluloid
-    include Celluloid::Notifications
+  module BasicService
 
-    class_attribute :internal_root_path
+    def self.included(klass)
+      klass.class_attribute :internal_root_path
+      klass.send(:include, Celluloid)
+      klass.send(:include, Celluloid::Notifications)
+    end
 
     def logger
       Celluloid::Logger

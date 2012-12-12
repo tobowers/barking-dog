@@ -1,5 +1,6 @@
 module BarkingDog
-  class CommandAndControlService < BaseService
+  class CommandAndControlService
+    include BarkingDog::BasicService
     include Celluloid::ZMQ
 
     self.internal_root_path = ''

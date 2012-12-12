@@ -1,5 +1,6 @@
 module BarkingDog
-  class ConfigurationService < BaseService
+  class ConfigurationService
+    include BarkingDog::BasicService
 
     def initialize
       on("new", :handle_new_configuration)

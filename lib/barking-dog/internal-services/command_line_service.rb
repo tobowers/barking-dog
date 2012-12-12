@@ -1,5 +1,6 @@
 module BarkingDog
-  class CommandLineService < BaseService
+  class CommandLineService
+    include BarkingDog::BasicService
 
     def initialize
       subscribe("barking-dog.command_line", :handle_command_line)

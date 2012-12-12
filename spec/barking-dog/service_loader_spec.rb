@@ -4,6 +4,12 @@ module BarkingDog
 
   describe ServiceLoader do
 
+    before(:all) do
+      class BaseService
+        include BarkingDog::BasicService
+      end
+    end
+
     before do
       #have the block called
       @service_loader = BarkingDog::ServiceLoader.run!
