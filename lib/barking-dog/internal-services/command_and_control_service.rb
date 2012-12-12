@@ -2,9 +2,11 @@ module BarkingDog
   class CommandAndControlService < BaseService
     include Celluloid::ZMQ
 
+    self.internal_root_path = ''
+
     attr_reader :socket, :address
     def initialize
-      subscribe("barking-dog.new_configuration_saved", :handle_new_configuration_saved)
+      on("new_configuration.saved", :handle_new_configuration_saved)
       @address = if config_service = Actor[:configuration_service] and config_service.alive?
                    Actor[:configuration_service].configuration[:command_and_control_address]
                  else
@@ -16,9 +18,9 @@ module BarkingDog
     def dispatch_command(command, *args)
       case command
         when "stop"
-          publish("barking-dog.termination_request", :command_control_term)
+          root_trigger("termination_request", :command_control_term)
         when "reload"
-          publish("barking-dog.reload_request", args.first)
+          root_trigger("reload_request", args.first)
         else
           logger.error("unkown command: '#{command}' with args: #{args.inspect}")
       end

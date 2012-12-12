@@ -5,7 +5,7 @@ module BarkingDog
 
   describe SignalHandlerService do
     before do
-      @receiver = GlobalEventReceiver.new
+      @receiver = EventReceiver.new
       @signal_handler = SignalHandlerService.new
     end
 

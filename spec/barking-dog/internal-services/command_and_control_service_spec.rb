@@ -8,7 +8,7 @@ module BarkingDog
       @command_and_control_service.async.run
 
       @command_sender = CommandSender.new
-      @receiver = GlobalEventReceiver.new
+      @receiver = EventReceiver.new
     end
 
     after do
@@ -18,9 +18,9 @@ module BarkingDog
     end
 
     it "should publish barking-dog.termination_request on stop" do
-      @future = @receiver.future.wait_for("barking-dog.termination_request")
+      @future = @receiver.future.wait_for("termination_request")
       @command_sender.write("stop")
-      @future.value(1).first.should == "barking-dog.termination_request"
+      @future.value(1).first.should == "termination_request"
     end
 
   end

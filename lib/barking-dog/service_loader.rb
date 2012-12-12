@@ -1,28 +1,36 @@
+INTERNAL_SERVICE_ROOT = File.expand_path(File.join(__FILE__, "..", "internal-services"))
+
+%w(command_and_control command_line configuration signal_handler event_debugger).each do |base_service_name|
+  file_name = File.join(INTERNAL_SERVICE_ROOT, "#{base_service_name}_service.rb")
+  require file_name
+end
+
 module BarkingDog
-  INTERNAL_SERVICE_ROOT = File.expand_path(File.join(__FILE__, "..", "internal-services"))
 
   class ServiceLoader < Celluloid::SupervisionGroup
     include Celluloid::Notifications
 
-    class_attribute :event_publisher
-    self.event_publisher = EventPublisher.new
+    class_attribute :root_event_path
+    self.root_event_path = "barking-dog"
 
     #supervise MyActor, :as => :my_actor
     #supervise AnotherActor, :as => :another_actor, :args => [{:start_working_right_now => true}]
     #pool MyWorker, :as => :my_worker_pool, :size => 5
 
-    attr_reader :registry
+    attr_reader :registry, :root_event_path, :event_publisher
     def initialize
+      @root_event_path = self.class.root_event_path
       super
-      subscribe("barking-dog.termination_request", :handle_termination_request)
-      subscribe("barking-dog.reload_request", :handle_reload_request)
+      @event_publisher = add_service(EventPublisher)
+      on("termination_request", :handle_termination_request)
+      on("reload_request", :handle_reload_request)
+      on("debug_request", :turn_on_event_debugger)
       load_internal_services
       @terminated = false
     end
 
     def handle_termination_request(pattern, args)
       logger.debug "handling termination request: #{args.inspect}"
-      self.class.event_publisher.terminate!
       terminate
     end
 
@@ -48,16 +56,13 @@ module BarkingDog
     end
 
     def load_internal_services
-      Dir.glob("#{INTERNAL_SERVICE_ROOT}/*_service.rb") do |file_name|
-        require file_name
-        begin
-          klass = "BarkingDog::#{File.basename(file_name, ".*").camelize}".constantize
-          add_service(klass)
-        rescue NameError => e
-          Celluloid::Logger.error("expected #{file_name} to load #{File.basename(file_name, ".*").camelize}, but raised: #{e.inspect}")
-          publish "barking-dog.termiation_request"
-        end
+      [CommandAndControlService, CommandLineService, ConfigurationService, SignalHandlerService].each do |klass|
+        add_service(klass)
       end
+    end
+
+    def turn_on_event_debugger(pattern=nil) #can be fired by an event handler
+      add_service(EventDebuggerService)
     end
 
     def wait_for_terminated
@@ -69,14 +74,28 @@ module BarkingDog
       Celluloid::Logger
     end
 
-    def add_service(klass, *args, &block)
-      registry_name = klass.name.underscore.to_sym
-      supervise_as registry_name, klass, *args, &block
-      if @registry[registry_name].respond_to?(:run)
-        @registry[registry_name].async.run
-      end
+    def on(path, meth)
+      subscribe(event_path(path), meth)
     end
 
+    def trigger(path, *args)
+      publish(event_path(path), *args)
+    end
+
+    def add_service(klass, *args, &block)
+      registry_name = klass.name.underscore.to_sym
+      member = supervise_as registry_name, klass, *args, &block
+      if member.actor.respond_to?(:run)
+        member.actor.async.run
+      end
+      member.actor
+    end
+
+
+  private
+    def event_path(path)
+      "#{root_event_path}.#{path}"
+    end
 
   end
 
