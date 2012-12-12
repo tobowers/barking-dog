@@ -40,10 +40,10 @@ module BarkingDog
       base_service.ping.should == "pong"
     end
 
-    describe "#change_root_event_path" do
+    describe "#root_event_path=" do
       before do
         @service_loader.root_event_path.should == ServiceLoader.root_event_path
-        @service_loader.change_root_event_path("other-dog")
+        @service_loader.root_event_path= "other-dog"
       end
 
       it "should set the root event path" do

@@ -17,8 +17,8 @@ module BarkingDog
     #supervise AnotherActor, :as => :another_actor, :args => [{:start_working_right_now => true}]
     #pool MyWorker, :as => :my_worker_pool, :size => 5
 
-    attr_reader :registry, :event_publisher
-    attr_accessor :root_event_path, :subscriptions
+    attr_reader :registry, :event_publisher, :root_event_path
+    attr_accessor :subscriptions
     def initialize
       @subscriptions = []
       @root_event_path = self.class.root_event_path
@@ -38,9 +38,9 @@ module BarkingDog
     # here we dup the old subs, and subscribe to the new ones
     # so that there's never a time when we're not listening
     # to any
-    def change_root_event_path(event_path)
+    def root_event_path=(event_path)
       old_subs = subscriptions.dup
-      self.root_event_path = event_path
+      @root_event_path = event_path
       subscribe_to_events
       old_subs.each do |sub|
         unsubscribe(sub)
