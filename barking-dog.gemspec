@@ -25,6 +25,6 @@ Gem::Specification.new do |s|
   s.add_development_dependency "debugger"
 
   s.files        = `git ls-files`.split("\n")
-  s.executables  = `git ls-files`.split("\n").select{|f| f =~ /^bin/}
+  s.executables  = s.files.select{|f| f =~ /^bin/}.map{ |f| File.basename(f) }
   s.require_path = 'lib'
 end
