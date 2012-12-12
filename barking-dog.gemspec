@@ -6,14 +6,11 @@ Gem::Specification.new do |s|
   s.name        = "barking-dog"
   s.version     = BarkingDog::VERSION
   s.platform    = Gem::Platform::RUBY
-  s.authors     = []
-  s.email       = []
+  s.authors     = ["Topper Bowers"]
+  s.email       = ["topper@amicushq.com"]
   s.homepage    = "http://rubygems.org/gems/barking-dog"
   s.summary     = "Is a service oriented service runner with internal pubsub and ZMQ"
   s.description = "Is a service oriented service runner with internal pubsub and ZMQ"
-
-  s.required_rubygems_version = ">= 1.3.6"
-  s.rubyforge_project         = "barking-dog"
 
   s.add_dependency("celluloid", ">= 0.12.4")
   s.add_dependency("celluloid-zmq")
