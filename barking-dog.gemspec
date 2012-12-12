@@ -22,7 +22,7 @@ Gem::Specification.new do |s|
 
   s.add_development_dependency "bundler", ">= 1.0.0.rc.5"
   s.add_development_dependency "rspec", "> 2.0.0"
-  s.add_development_dependency "debugger"
+  #s.add_development_dependency "debugger"
 
   s.files        = `git ls-files`.split("\n")
   s.executables  = s.files.select{|f| f =~ /^bin/}.map{ |f| File.basename(f) }
