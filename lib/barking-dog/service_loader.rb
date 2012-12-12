@@ -4,8 +4,8 @@ module BarkingDog
   class ServiceLoader < Celluloid::SupervisionGroup
     include Celluloid::Notifications
 
-    class_attribute :global_event_publisher
-    self.global_event_publisher = GlobalEventPublisher.new
+    class_attribute :event_publisher
+    self.event_publisher = EventPublisher.new
 
     #supervise MyActor, :as => :my_actor
     #supervise AnotherActor, :as => :another_actor, :args => [{:start_working_right_now => true}]
@@ -22,7 +22,7 @@ module BarkingDog
 
     def handle_termination_request(pattern, args)
       logger.debug "handling termination request: #{args.inspect}"
-      self.class.global_event_publisher.terminate!
+      self.class.event_publisher.terminate!
       terminate
     end
 

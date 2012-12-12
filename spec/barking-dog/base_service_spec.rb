@@ -3,17 +3,19 @@ require 'spec_helper'
 module BarkingDog
   describe BaseService do
 
+    let(:base_service) { BaseService.new }
+
     before do
-      @base = BaseService.new
+      base_service = BaseService.new
     end
 
     after do
-      @base.terminate
+      base_service.terminate
     end
 
     it "should be a publisher and receiver" do
-      @base.respond_to?(:publish).should be_true
-      @base.respond_to?(:subscribe).should be_true
+      base_service.respond_to?(:publish).should be_true
+      base_service.respond_to?(:subscribe).should be_true
     end
 
 
