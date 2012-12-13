@@ -3,29 +3,45 @@ require 'spec_helper'
 module BarkingDog
   describe BasicService do
 
-    before(:all) do
+    before do
       class BaseService
         include BasicService
+        on "cool_stuff", :handle_cool_stuff
+
+        def handle_cool_stuff(*args)
+        end
       end
     end
 
     let(:base_service) { BaseService.new }
 
     before do
-      base_service = BaseService.new
+      base_service #spin up the base_service instance
     end
 
     after do
       base_service.terminate
     end
 
+    describe "class level event handlers" do
+      it "should set the class event hash" do
+        BaseService.event_hash.should == {"cool_stuff" => :handle_cool_stuff}
+      end
+
+    end
+
     it "should be a publisher and receiver" do
-      base_service.respond_to?(:publish).should be_true
-      base_service.respond_to?(:subscribe).should be_true
+      base_service.respond_to?(:on).should be_true
+      base_service.respond_to?(:trigger).should be_true
     end
 
     it "should publish to its class" do
       base_service.event_path("test").should == "base_service/test"
+    end
+
+    it "should have a class concurrency attribute" do
+      BaseService.concurrency = 2
+      BaseService.concurrency.should == 2
     end
 
     describe "when part of a service loader" do

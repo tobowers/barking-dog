@@ -4,10 +4,10 @@ module BarkingDog
     include Celluloid::ZMQ
 
     self.internal_root_path = ''
+    on("new_configuration.saved", :handle_new_configuration_saved)
 
     attr_reader :socket, :address
     def initialize
-      on("new_configuration.saved", :handle_new_configuration_saved)
       @address = if config_service = Actor[:configuration_service] and config_service.alive?
                    Actor[:configuration_service].configuration[:command_and_control_address]
                  else

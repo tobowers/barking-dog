@@ -41,11 +41,18 @@ module BarkingDog
     def root_event_path=(event_path)
       old_subs = subscriptions.dup
       @root_event_path = event_path
+      reset_member_root_paths
       subscribe_to_events
       old_subs.each do |sub|
         unsubscribe(sub)
       end
       self.subscriptions = subscriptions - old_subs
+    end
+
+    def reset_member_root_paths
+      actors.each do |actor|
+        actor.root_event_path = root_event_path
+      end
     end
 
     def termination_request(*args)
@@ -99,12 +106,29 @@ module BarkingDog
     end
 
     def add_service(klass, *args, &block)
-      registry_name = klass.name.underscore.to_sym
-      member = supervise_as registry_name, klass, *args, &block
+      member = supervise_as registry_name_for(klass), klass, *args, &block
       if member.actor.respond_to?(:run)
         member.actor.async.run
       end
+      actor = member.actor
+      subscribe_actor(actor)
+      actor
+    end
+
+    def add_concurrent_service(klass, *args, &block)
+      raise NotImplementedError
+
+      pool_opts = { args: args, block: block, as: registry_name_for(klass) }
+      if has_concurrent_option?(klass)
+        pool_opts.merge!(size: klass.concurrency)
+      end
+      member = pool klass, pool_opts
       member.actor
+    end
+
+    def subscribe_actor(actor)
+      actor.root_event_path = root_event_path
+      actor.subscribe_to_class_events
     end
 
     def event_path(path)
@@ -113,6 +137,14 @@ module BarkingDog
 
     def trigger(*args, &block)
       event_publisher.trigger(*args, &block)
+    end
+
+    def registry_name_for(klass)
+      klass.name.underscore.to_sym
+    end
+
+    def has_concurrent_option?(klass)
+      klass.respond_to?(:concurrency) and klass.concurrency
     end
 
   end

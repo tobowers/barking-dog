@@ -5,6 +5,7 @@ module BarkingDog
   describe CommandAndControlService do
     before do
       @command_and_control_service = CommandAndControlService.new
+      @command_and_control_service.subscribe_to_class_events
       @command_and_control_service.async.run
 
       @command_sender = CommandSender.new

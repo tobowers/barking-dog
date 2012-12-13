@@ -7,6 +7,7 @@ module BarkingDog
     before do
       @receiver = EventReceiver.new
       @signal_handler = SignalHandlerService.new
+      @signal_handler.subscribe_to_class_events
     end
 
     after do

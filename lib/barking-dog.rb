@@ -15,6 +15,7 @@ COMMAND_AND_CONTROL_TOPIC = "barking-dog.command_and_control"
 
 require 'barking-dog/event'
 require 'barking-dog/basic_service'
+require 'barking-dog/pool_proxy'
 require 'barking-dog/event_publisher'
 require 'barking-dog/command_sender'
 require 'barking-dog/service_loader'

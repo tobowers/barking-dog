@@ -4,7 +4,7 @@ module BarkingDog
 
   describe ServiceLoader do
 
-    before(:all) do
+    before do
       class BaseService
         include BarkingDog::BasicService
       end
@@ -21,7 +21,7 @@ module BarkingDog
       @service_loader.async.trigger("termination_request", payload: :SPEC)
       if @service_loader.alive?
         future = @service_loader.future.wait_for_terminated
-        future.value(5)
+        future.value(2)
       end
     end
 
@@ -40,10 +40,40 @@ module BarkingDog
       base_service.ping.should == "pong"
     end
 
+    describe "concurrent services" do
+      let(:base_service) { @service_loader.add_concurrent_service(BaseConcurrentService) }
+
+      before do
+        class BaseConcurrentService
+          include BarkingDog::BasicService
+          self.concurrency = 2
+
+          on "cool", :handle_cool
+
+          class_attribute :cool_handler
+          self.cool_handler = Queue.new
+
+          def handle_cool(_, evt)
+            #self.class.cool_handler << evt
+          end
+
+        end
+
+        BaseConcurrentService.cool_handler.length.should == 0
+      end
+
+      it "should add concurrent_services" do
+        pending "we do not use concurrent_services"
+        base_service.size.should == BaseConcurrentService.concurrency
+      end
+    end
+
+
+
     describe "#root_event_path=" do
       before do
         @service_loader.root_event_path.should == ServiceLoader.root_event_path
-        @service_loader.root_event_path= "other-dog"
+        @service_loader.root_event_path = "other-dog"
       end
 
       it "should set the root event path" do

@@ -1,11 +1,11 @@
 module BarkingDog
   class ConfigurationService
     include BarkingDog::BasicService
+    on("new", :handle_new_configuration)
 
     attr_accessor :configuration
     def initialize
       @configuration ||= {}
-      on("new", :handle_new_configuration)
     end
 
     def handle_new_configuration(pattern, event)

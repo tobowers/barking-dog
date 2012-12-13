@@ -1,8 +1,21 @@
 module BarkingDog
   module BasicService
 
+    module ClassMethods
+      def event_hash
+        @event_hash ||= {}
+      end
+
+      def on(evt, meth)
+        event_hash[evt] = meth
+      end
+
+    end
+
     def self.included(klass)
       klass.class_attribute :internal_root_path
+      klass.class_attribute :concurrency
+      klass.extend(ClassMethods)
       klass.send(:include, Celluloid)
       klass.send(:include, Celluloid::Notifications)
     end
@@ -16,7 +29,8 @@ module BarkingDog
     end
 
     def on(path, meth)
-      #logger.debug "#{current_actor.class.name} is listening to: #{event_path(path)} with #{meth}"
+      logger.debug "#on called on #{actor_name}"
+      logger.debug "#{current_actor.class.name} is listening to: #{event_path(path)} with #{meth}"
       subscribe(event_path(path), meth)
     end
 
@@ -27,10 +41,11 @@ module BarkingDog
     end
 
     def event_path(path)
+      logger.debug("event path for #{path} on #{current_actor}")
       if internal_root
         path = "#{internal_root}/#{path}"
       end
-      if linked_service_loader?
+      if root_event_path
         path = "#{root_event_path}/#{path}"
       end
       path
@@ -42,7 +57,7 @@ module BarkingDog
     end
 
     def path_with_root(path)
-      if linked_service_loader?
+      if root_event_path
         path = "#{root_event_path}/#{path}"
       end
       path
@@ -53,23 +68,29 @@ module BarkingDog
     end
 
     def root_event_path
-      linked_service_loader? ? linked_service_loader.root_event_path : nil
+      @root_event_path
+    end
+
+    def root_event_path=(str)
+      @root_event_path = str
+    end
+
+    def subscribe_to_class_events
+      current_actor.class.event_hash.each_pair do |pattern, meth|
+        current_actor.on(pattern, meth)
+      end
     end
 
   private
+
+    def actor_name
+      current_actor.class.name
+    end
 
     def publish_with_event(path, opts = {})
       generated_by = Array(opts[:generated_by]).dup
       generated_by.unshift(path)
       async.publish(path, Event.new(path: path, payload: opts[:payload], generated_by: generated_by ))
-    end
-
-    def linked_service_loader?
-      !!linked_service_loader
-    end
-
-    def linked_service_loader
-      @linked_service_loader ||= current_actor.links.detect {|actor| actor.is_a?(ServiceLoader)}
     end
 
   end

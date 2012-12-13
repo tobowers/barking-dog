@@ -8,6 +8,7 @@ module BarkingDog
     before do
       @publisher = EventPublisher.new
       @config_service = ConfigurationService.new
+      @config_service.subscribe_to_class_events
     end
 
     after do
