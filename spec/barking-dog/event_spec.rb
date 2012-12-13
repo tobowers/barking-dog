@@ -22,6 +22,11 @@ module BarkingDog
     it "should to_json" do
       JSON.load(event.to_json)['path'].should == event_path
     end
+
+    it "should show two identical events as equal" do
+      event2 = Event.new(path: event_path)
+      event2.should == event
+    end
   end
 
 end

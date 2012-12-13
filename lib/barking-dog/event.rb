@@ -2,7 +2,9 @@ module BarkingDog
 
   class Event
 
-    attr_accessor :version, :payload, :generated_at, :generated_by, :path
+    ATTRIBUTE_METHODS = [:version, :payload, :generated_at, :generated_by, :path]
+
+    attr_accessor *ATTRIBUTE_METHODS
     def initialize(opts)
       @generated_at = Time.now.utc
       opts.each_pair do |key, value|
@@ -24,6 +26,10 @@ module BarkingDog
 
     def to_json
       JSON.dump(to_hash)
+    end
+
+    def ==(other)
+      (ATTRIBUTE_METHODS - [:generated_at]).inject(true) {|accum, method| accum && self.send(method) == other.send(method) }
     end
 
   end
