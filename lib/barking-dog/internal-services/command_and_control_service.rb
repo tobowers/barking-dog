@@ -4,7 +4,7 @@ module BarkingDog
     include Celluloid::ZMQ
 
     self.internal_root_path = ''
-    on("new_configuration.saved", :handle_new_configuration_saved)
+    on("new_configuration/saved", :handle_new_configuration_saved)
 
     attr_reader :socket, :address
     def initialize

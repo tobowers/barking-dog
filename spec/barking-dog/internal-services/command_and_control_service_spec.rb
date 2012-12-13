@@ -1,5 +1,5 @@
 require 'spec_helper'
-#require 'barking-dog/internal-services/command_and_control_service'
+require 'barking-dog/internal-services/command_and_control_service'
 
 module BarkingDog
   describe CommandAndControlService do
