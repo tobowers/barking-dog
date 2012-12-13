@@ -7,10 +7,15 @@ module BarkingDog
       class BaseService
         include BasicService
         on "cool_stuff", :handle_cool_stuff
+        class_attribute :cool_stuff_receiver
+        self.cool_stuff_receiver = Queue.new
+
 
         def handle_cool_stuff(*args)
+          self.class.cool_stuff_receiver << args
         end
       end
+      BaseService.cool_stuff_receiver.length.should == 0
     end
 
     let(:base_service) { BaseService.new }
@@ -24,10 +29,27 @@ module BarkingDog
     end
 
     describe "class level event handlers" do
+      let(:event_receiver) { EventReceiver.new }
+      let(:event_future) { event_receiver.future.wait_for("cool_stuff") }
+      let(:publisher) { EventPublisher.new }
+
+      after do
+        event_receiver.terminate
+        publisher.terminate
+      end
+
       it "should set the class event hash" do
         BaseService.event_hash.should == {"cool_stuff" => :handle_cool_stuff}
       end
 
+      it "should subscribe to the events when create_isolated" do
+        future = event_future
+        base_service = BaseService.create_isolated
+        publisher.trigger("cool_stuff")
+        future.value(1)[0].should == "cool_stuff"
+        base_service.terminate
+        BaseService.cool_stuff_receiver.length.should == 1
+      end
     end
 
     it "should be a publisher and receiver" do

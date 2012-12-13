@@ -10,6 +10,12 @@ module BarkingDog
         event_hash[evt] = meth
       end
 
+      def create_isolated(*args, &block)
+        service = new(*args, &block)
+        service.subscribe_to_class_events
+        service
+      end
+
     end
 
     def self.included(klass)
@@ -80,6 +86,7 @@ module BarkingDog
       current_actor.class.event_hash.each_pair do |pattern, meth|
         current_actor.on(pattern, meth)
       end
+      current_actor
     end
 
   private
