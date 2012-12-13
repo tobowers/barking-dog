@@ -89,6 +89,12 @@ module BarkingDog
       current_actor
     end
 
+    def event_from_options(path, opts)
+      generated_by = Array(opts[:generated_by]).dup
+      generated_by.unshift(path)
+      Event.new(path: path, payload: opts[:payload], generated_by: generated_by )
+    end
+
   private
 
     def actor_name
@@ -96,9 +102,7 @@ module BarkingDog
     end
 
     def publish_with_event(path, opts = {})
-      generated_by = Array(opts[:generated_by]).dup
-      generated_by.unshift(path)
-      async.publish(path, Event.new(path: path, payload: opts[:payload], generated_by: generated_by ))
+      async.publish(path, event_from_options(path, opts))
     end
 
   end
