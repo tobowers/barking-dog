@@ -30,7 +30,7 @@ module BarkingDog
     end
 
     def subscribe_to_events
-      on("termination_request", :handle_termination_request)
+      on("termination_request", :termination_request)
       on("reload_request", :handle_reload_request)
       on("debug_request", :turn_on_event_debugger)
     end
@@ -48,7 +48,7 @@ module BarkingDog
       self.subscriptions = subscriptions - old_subs
     end
 
-    def handle_termination_request(pattern, args)
+    def termination_request(*args)
       logger.debug "handling termination request: #{args.inspect}"
       terminate
     end
@@ -59,7 +59,8 @@ module BarkingDog
       super
     end
 
-    def handle_reload_request(pattern, file_name)
+    def handle_reload_request(pattern, evt)
+      file_name = evt.payload
       logger.debug("#{pattern}: #{file_name}")
       supervision_name = File.basename(file_name, ".*")
       logger.debug("supervision name: #{supervision_name}")
@@ -80,7 +81,7 @@ module BarkingDog
       end
     end
 
-    def turn_on_event_debugger(pattern=nil) #can be fired by an event handler
+    def turn_on_event_debugger(_=nil,_=nil) #can be fired by an event handler
       add_service(EventDebuggerService)
     end
 
@@ -97,10 +98,6 @@ module BarkingDog
       subscriptions << subscribe(event_path(path), meth)
     end
 
-    def trigger(path, *args)
-      publish(event_path(path), *args)
-    end
-
     def add_service(klass, *args, &block)
       registry_name = klass.name.underscore.to_sym
       member = supervise_as registry_name, klass, *args, &block
@@ -110,10 +107,12 @@ module BarkingDog
       member.actor
     end
 
-
-  private
     def event_path(path)
-      "#{root_event_path}.#{path}"
+      "#{root_event_path}/#{path}"
+    end
+
+    def trigger(*args, &block)
+      event_publisher.trigger(*args, &block)
     end
 
   end

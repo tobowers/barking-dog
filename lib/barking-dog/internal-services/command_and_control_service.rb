@@ -19,15 +19,15 @@ module BarkingDog
     def dispatch_command(command, *args)
       case command
         when "stop"
-          root_trigger("termination_request", :command_control_term)
+          root_trigger("termination_request", payload: :command_control_term)
         when "reload"
-          root_trigger("reload_request", args.first)
+          root_trigger("reload_request", payload: args.first)
         else
           logger.error("unkown command: '#{command}' with args: #{args.inspect}")
       end
     end
 
-    def handle_new_configuration_saved(pattern, config)
+    def handle_new_configuration_saved(pattern, event)
       stop_loop
       @address = config[:command_and_control_address] || DEFAULT_COMMAND_AND_CONTROL_SOCKET
       setup_socket

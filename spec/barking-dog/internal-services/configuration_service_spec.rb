@@ -21,23 +21,24 @@ module BarkingDog
     end
 
     describe "updating the config" do
-      let(:event_name) { "configuration_service.saved" }
+      let(:event_name) { "configuration_service/saved" }
       let(:new_config) { {:foo => :bar} }
 
       before do
         @future = receiver.future.wait_for(event_name)
-        @publisher.publish("configuration_service.new", new_config)
-        @config_service.configuration.should == new_config
+        @publisher.trigger("configuration_service/new", payload: new_config)
       end
 
       it "should update configs on events" do
+        val = @future.value(1)
+        val.first.should == event_name
         @config_service.configuration.should == new_config
       end
 
       it "should publish config changes" do
         val = @future.value(1)
         val.first.should == event_name
-        val.last.should == new_config
+        val.last.payload.should == new_config
       end
 
     end

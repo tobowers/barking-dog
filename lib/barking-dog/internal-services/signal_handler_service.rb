@@ -5,7 +5,7 @@ module BarkingDog
     def initialize
        logger.debug("trapping INT signal")
        Signal.trap("INT") do
-         publish("barking-dog.termination_request", :INT)
+         trigger("termination_request", payload: :INT)
        end
     end
 

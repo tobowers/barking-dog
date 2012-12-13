@@ -18,7 +18,7 @@ module BarkingDog
 
     after do
       @event_receiver.terminate
-      @service_loader.async.trigger("termination_request", :SPEC)
+      @service_loader.async.trigger("termination_request", payload: :SPEC)
       if @service_loader.alive?
         future = @service_loader.future.wait_for_terminated
         future.value(5)
@@ -56,8 +56,8 @@ module BarkingDog
 
       it "should not respond to the old events" do
         event_publisher = EventPublisher.new
-        event_publisher.root_trigger("barking-dog.debug_request")
-        @event_receiver.future.wait_for("barking-dog.debug_request").value(1) #wait for the async event
+        event_publisher.root_trigger("barking-dog/debug_request")
+        @event_receiver.future.wait_for("barking-dog/debug_request").value(1) #wait for the async event
 
         has_service?(EventDebuggerService).should be_false
       end
@@ -72,8 +72,8 @@ module BarkingDog
       end
 
       it "should respond to the debugging event" do
-        @service_loader.event_publisher.trigger("debug_request")
-        @event_receiver.future.wait_for("barking-dog.debug_request").value(1) #wait for the async event
+        @service_loader.trigger("debug_request")
+        @event_receiver.future.wait_for("barking-dog/debug_request").value(1) #wait for the async event
         has_service?(EventDebuggerService).should be_true
       end
 

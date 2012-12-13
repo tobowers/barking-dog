@@ -20,28 +20,30 @@ module BarkingDog
       subscribe(event_path(path), meth)
     end
 
-    def trigger(path, *args)
+    def trigger(path, opts = {})
       #logger.debug "#{current_actor.class.name} is triggering: #{event_path(path)} with #{args.inspect}"
-      async.publish(event_path(path), *args)
+      path = event_path(path)
+      publish_with_event(path, opts)
     end
 
     def event_path(path)
       if internal_root
-        path = "#{internal_root}.#{path}"
+        path = "#{internal_root}/#{path}"
       end
       if linked_service_loader?
-        path = "#{root_event_path}.#{path}"
+        path = "#{root_event_path}/#{path}"
       end
       path
     end
 
-    def root_trigger(path, *args)
-      async.publish(path_with_root(path), *args)
+    def root_trigger(path, opts = {})
+      path = path_with_root(path)
+      publish_with_event(path, opts)
     end
 
     def path_with_root(path)
       if linked_service_loader?
-        path = "#{root_event_path}.#{path}"
+        path = "#{root_event_path}/#{path}"
       end
       path
     end
@@ -55,6 +57,12 @@ module BarkingDog
     end
 
   private
+
+    def publish_with_event(path, opts = {})
+      generated_by = Array(opts[:generated_by]).dup
+      generated_by.unshift(path)
+      async.publish(path, Event.new(path: path, payload: opts[:payload], generated_by: generated_by ))
+    end
 
     def linked_service_loader?
       !!linked_service_loader

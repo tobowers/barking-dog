@@ -25,7 +25,7 @@ module BarkingDog
     end
 
     it "should publish to its class" do
-      base_service.event_path("test").should == "base_service.test"
+      base_service.event_path("test").should == "base_service/test"
     end
 
     describe "when part of a service loader" do
@@ -39,7 +39,7 @@ module BarkingDog
 
       after do
         #@service_loader.terminate
-        @service_loader.async.trigger("termination_request", :SPEC)
+        @service_loader.async.trigger("termination_request", payload: :SPEC)
         if @service_loader.alive?
           future = @service_loader.future.wait_for_terminated
           future.value(5)
@@ -51,7 +51,7 @@ module BarkingDog
       end
 
       it "should publish to its root and class" do
-        @base_service.event_path("test").should == "#{expected_root}.base_service.test"
+        @base_service.event_path("test").should == "#{expected_root}/base_service/test"
       end
 
 
