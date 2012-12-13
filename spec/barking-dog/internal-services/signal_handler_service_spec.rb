@@ -6,8 +6,7 @@ module BarkingDog
   describe SignalHandlerService do
     before do
       @receiver = EventReceiver.new
-      @signal_handler = SignalHandlerService.new
-      @signal_handler.subscribe_to_class_events
+      @signal_handler = SignalHandlerService.create_isolated
     end
 
     after do
