@@ -1,7 +1,7 @@
 module BarkingDog
   class ConfigurationService
     include BarkingDog::BasicService
-    on("new", :handle_new_configuration)
+    on("configuration_service/new", :handle_new_configuration)
 
     attr_accessor :configuration
     def initialize

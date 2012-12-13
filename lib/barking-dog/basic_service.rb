@@ -31,11 +31,11 @@ module BarkingDog
     def on(path, meth)
       logger.debug "#on called on #{actor_name}"
       logger.debug "#{current_actor.class.name} is listening to: #{event_path(path)} with #{meth}"
-      subscribe(event_path(path), meth)
+      subscribe(path, meth)
     end
 
     def trigger(path, opts = {})
-      #logger.debug "#{current_actor.class.name} is triggering: #{event_path(path)} with #{args.inspect}"
+      logger.debug "#{current_actor.class.name} is triggering: #{event_path(path)} with #{opts.inspect}"
       path = event_path(path)
       publish_with_event(path, opts)
     end
@@ -52,6 +52,7 @@ module BarkingDog
     end
 
     def root_trigger(path, opts = {})
+      logger.debug "#{current_actor.class.name} is root_triggering: #{path_with_root(path)} with #{opts.inspect}"
       path = path_with_root(path)
       publish_with_event(path, opts)
     end
