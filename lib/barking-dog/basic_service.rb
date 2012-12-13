@@ -6,8 +6,8 @@ module BarkingDog
         @event_hash ||= {}
       end
 
-      def on(evt, meth)
-        event_hash[evt] = meth
+      def on(evt, meth, opts = {})
+        event_hash[evt] = {method: meth, options: opts}
       end
 
       def create_isolated(*args, &block)
@@ -83,8 +83,8 @@ module BarkingDog
     end
 
     def subscribe_to_class_events
-      current_actor.class.event_hash.each_pair do |pattern, meth|
-        current_actor.on(pattern, meth)
+      current_actor.class.event_hash.each_pair do |pattern, method_and_options|
+        current_actor.on(pattern, method_and_options[:method])
       end
       current_actor
     end

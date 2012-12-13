@@ -13,9 +13,9 @@ module BarkingDog
 
     def setup_listeners
       logger.debug("setting up listeners")
-      klass.event_hash.each_pair do |path, meth|
+      klass.event_hash.each_pair do |path, method_and_options|
         logger.debug("subscribing to #{path}")
-        subscribers << notifier.subscribe(pool, path, meth)
+        subscribers << notifier.subscribe(pool, path, method_and_options[:method])
       end
     end
 

@@ -39,7 +39,7 @@ module BarkingDog
       end
 
       it "should set the class event hash" do
-        BaseService.event_hash.should == {"cool_stuff" => :handle_cool_stuff}
+        BaseService.event_hash.should == {"cool_stuff" => {method: :handle_cool_stuff, options: {}}}
       end
 
       it "should subscribe to the events when create_isolated" do
