@@ -16,7 +16,7 @@ module BarkingDog
 
     # target isn't serializable - so we don't put it in here,
     # but it can be useful internally
-    def to_hash
+    def to_hash(options = {})
       {
           version: version,
           payload: payload,
@@ -26,8 +26,8 @@ module BarkingDog
       }
     end
 
-    def to_json
-      JSON.dump(to_hash)
+    def to_json(options = {})
+      JSON.dump(to_hash(options))
     end
 
     def ==(other)
