@@ -3,7 +3,7 @@ module BarkingDog
     include BarkingDog::BasicService
     on("command_line", :handle_command_line)
 
-    def handle_command_line(pattern, event)
+    def handle_command_line(_, event)
       logger.debug "command line received: #{event.payload.inspect}"
     end
 
