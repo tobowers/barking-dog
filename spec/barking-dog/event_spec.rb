@@ -23,6 +23,10 @@ module BarkingDog
       JSON.load(event.to_json)['path'].should == event_path
     end
 
+    it "should from_json" do
+      Event.from_json(event.to_json).should == event
+    end
+
     it "should take options to to_json" do
       event.to_json(some: 'op').should be_a String
     end
