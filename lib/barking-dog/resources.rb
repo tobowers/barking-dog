@@ -9,6 +9,14 @@ module BarkingDog
       block.call(self)
     end
 
+    def each_pair(&block)
+      @settings.each_pair(&block)
+    end
+
+    def each(&block)
+      @settings.each(&block)
+    end
+
     def clear
       @settings = {}
     end
