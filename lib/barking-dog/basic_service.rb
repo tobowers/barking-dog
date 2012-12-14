@@ -26,6 +26,21 @@ module BarkingDog
       klass.send(:include, Celluloid::Notifications)
     end
 
+    def before_initialize(*args, &block)
+      trigger("before_initialize")
+    end
+
+    def after_initialize(*args, &block)
+      trigger("after_initialize")
+    end
+
+    def initialize(*args, &block)
+      before_initialize *args, &block if respond_to?(:before_initialize)
+      r = super
+      after_initialize *args, &block if respond_to?(:after_initialize)
+      r
+    end
+
     def logger
       Celluloid::Logger
     end
@@ -92,7 +107,7 @@ module BarkingDog
     def event_from_options(path, opts)
       generated_by = Array(opts[:generated_by]).dup
       generated_by.unshift(path)
-      Event.new(path: path, payload: opts[:payload], generated_by: generated_by )
+      Event.new(path: path, payload: opts[:payload], generated_by: generated_by, target: current_actor )
     end
 
   private

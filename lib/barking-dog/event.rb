@@ -2,7 +2,7 @@ module BarkingDog
 
   class Event
 
-    ATTRIBUTE_METHODS = [:version, :payload, :generated_at, :generated_by, :path]
+    ATTRIBUTE_METHODS = [:version, :payload, :generated_at, :generated_by, :path, :target]
 
     attr_accessor *ATTRIBUTE_METHODS
     def initialize(opts)
@@ -14,6 +14,8 @@ module BarkingDog
       @generated_by << path
     end
 
+    # target isn't serializable - so we don't put it in here,
+    # but it can be useful internally
     def to_hash
       {
           version: version,

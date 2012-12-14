@@ -11,12 +11,16 @@ module BarkingDog
       @subscribers = []
     end
 
-    def setup_listeners
+    def subscribe_to_class_events
       logger.debug("setting up listeners")
       klass.event_hash.each_pair do |path, method_and_options|
         logger.debug("subscribing to #{path}")
         subscribers << notifier.subscribe(pool, path, method_and_options[:method])
       end
+    end
+
+    def root_event_path=(path)
+
     end
 
     #overwrite internal root so it is the passed in klass instead of the pool proxy

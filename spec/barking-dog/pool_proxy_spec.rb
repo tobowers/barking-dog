@@ -36,7 +36,7 @@ module BarkingDog
 
     before do
       event_future #calling to setup the future
-      pool_proxy.setup_listeners
+      pool_proxy.subscribe_to_class_events
     end
 
     it "should proxy events to the pool" do

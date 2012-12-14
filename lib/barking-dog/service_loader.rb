@@ -66,22 +66,6 @@ module BarkingDog
       super
     end
 
-    def handle_reload_request(pattern, evt)
-      file_name = evt.payload
-      logger.debug("#{pattern}: #{file_name}")
-      supervision_name = File.basename(file_name, ".*")
-      logger.debug("supervision name: #{supervision_name}")
-      actor = @registry[supervision_name.to_sym]
-      logger.debug("found actor")
-      actor_class = actor.class
-      logger.debug('terminating actor')
-      actor.terminate
-      logger.debug("using ruby 'load' on #{file_name}")
-      load file_name
-      logger.debug('setting up supervision again')
-      supervise_as supervision_name.to_sym, actor_class
-    end
-
     def load_internal_services
       [CommandAndControlService, CommandLineService, ConfigurationService, SignalHandlerService].each do |klass|
         add_service(klass)
@@ -106,24 +90,28 @@ module BarkingDog
     end
 
     def add_service(klass, *args, &block)
-      member = supervise_as registry_name_for(klass), klass, *args, &block
-      if member.actor.respond_to?(:run)
-        member.actor.async.run
-      end
+      member = if klass.concurrency
+                 add_concurrent_service(klass, *args, &block)
+               else
+                 add_single_actor_service(klass, *args, &block)
+               end
       actor = member.actor
       subscribe_actor(actor)
       actor
     end
 
-    def add_concurrent_service(klass, *args, &block)
-      raise NotImplementedError
-
-      pool_opts = { args: args, block: block, as: registry_name_for(klass) }
-      if has_concurrent_option?(klass)
-        pool_opts.merge!(size: klass.concurrency)
+    def add_single_actor_service(klass, *args, &block)
+      member = supervise_as registry_name_for(klass), klass, *args, &block
+      if member.actor.respond_to?(:run)
+        member.actor.async.run
       end
-      member = pool klass, pool_opts
-      member.actor
+      member
+    end
+
+    def add_concurrent_service(klass, *args, &block)
+      class_for_loader = PoolProxy
+      args = {args: [klass, args: args, size: klass.concurrency], }
+      add(class_for_loader, :args => args, :block => block, :as => registry_name_for(klass))
     end
 
     def subscribe_actor(actor)
@@ -145,6 +133,23 @@ module BarkingDog
 
     def has_concurrent_option?(klass)
       klass.respond_to?(:concurrency) and klass.concurrency
+    end
+
+    # this thing isn't really tested
+    def handle_reload_request(pattern, evt)
+      file_name = evt.payload
+      logger.debug("#{pattern}: #{file_name}")
+      supervision_name = File.basename(file_name, ".*")
+      logger.debug("supervision name: #{supervision_name}")
+      actor = @registry[supervision_name.to_sym]
+      logger.debug("found actor")
+      actor_class = actor.class
+      logger.debug('terminating actor')
+      actor.terminate
+      logger.debug("using ruby 'load' on #{file_name}")
+      load file_name
+      logger.debug('setting up supervision again')
+      supervise_as supervision_name.to_sym, actor_class
     end
 
   end
