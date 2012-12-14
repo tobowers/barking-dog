@@ -72,7 +72,7 @@ module BarkingDog
 
     describe "#root_event_path=" do
       before do
-        @service_loader.root_event_path.should == ServiceLoader.root_event_path
+        @service_loader.root_event_path.should == BarkingDog.resources.root_event_path
         @service_loader.root_event_path = "other-dog"
       end
 
@@ -82,14 +82,6 @@ module BarkingDog
 
       it "should only keep subscriptions for the new ones" do
         @service_loader.subscriptions.length.should == 3
-      end
-
-      it "should not respond to the old events" do
-        event_publisher = EventPublisher.new
-        event_publisher.root_trigger("barking-dog/debug_request")
-        @event_receiver.future.wait_for("barking-dog/debug_request").value(1) #wait for the async event
-
-        has_service?(EventDebuggerService).should be_false
       end
 
     end
@@ -103,7 +95,7 @@ module BarkingDog
 
       it "should respond to the debugging event" do
         @service_loader.trigger("debug_request")
-        @event_receiver.future.wait_for("barking-dog/debug_request").value(1) #wait for the async event
+        @event_receiver.future.wait_for("debug_request").value(1) #wait for the async event
         has_service?(EventDebuggerService).should be_true
       end
 

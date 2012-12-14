@@ -46,7 +46,7 @@ module BarkingDog
         future = event_future
         base_service = BaseService.create_isolated
         publisher.trigger("cool_stuff")
-        future.value(1)[0].should == "cool_stuff"
+        future.value(1)[0].should == "barking-dog/cool_stuff"
         base_service.terminate
         BaseService.cool_stuff_receiver.length.should == 1
       end
@@ -58,7 +58,7 @@ module BarkingDog
     end
 
     it "should publish to its class" do
-      base_service.event_path("test").should == "base_service/test"
+      base_service.event_path("test").should == "barking-dog/base_service/test"
     end
 
     it "should have a class concurrency attribute" do

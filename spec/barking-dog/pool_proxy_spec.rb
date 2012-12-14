@@ -41,7 +41,7 @@ module BarkingDog
 
     it "should proxy events to the pool" do
       event_publisher.trigger("cool")
-      event_future.value(1)[0].should == "cool"
+      event_future.value(1)[0].should == "barking-dog/cool"
       BaseConcurrentService.cool_handler.length.should == 1
     end
 

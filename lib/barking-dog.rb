@@ -29,6 +29,7 @@ end
 BarkingDog.resources do |config|
   config.default_command_and_control_socket = "ipc:///tmp/barking-dog"
   config.comand_and_control_topic = "barking-dog.command_and_control"
+  config.root_event_path = "barking-dog"
 end
 
 COMMAND_AND_CONTROL_TOPIC =

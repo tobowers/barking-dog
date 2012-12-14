@@ -13,10 +13,13 @@ class EventReceiver
   end
 
   def wait_for(pattern)
-    while !has_pattern?(pattern)
+    path = "#{BarkingDog.resources.root_event_path}/#{pattern}"
+    logger.debug "event receiver (spec) is waiting for #{path}"
+    while !has_pattern?(path)
       sleep 0.001
     end
-    events.detect {|e| e.first == pattern }
+    logger.debug "event receiver (spec) received #{path}"
+    events.detect {|e| e.first == path }
   end
 
   def has_pattern?(pattern)

@@ -26,21 +26,6 @@ module BarkingDog
       klass.send(:include, Celluloid::Notifications)
     end
 
-    def before_initialize(*args, &block)
-      trigger("before_initialize")
-    end
-
-    def after_initialize(*args, &block)
-      trigger("after_initialize")
-    end
-
-    def initialize(*args, &block)
-      before_initialize *args, &block if respond_to?(:before_initialize)
-      r = super
-      after_initialize *args, &block if respond_to?(:after_initialize)
-      r
-    end
-
     def logger
       Celluloid::Logger
     end
@@ -49,10 +34,10 @@ module BarkingDog
       "pong"
     end
 
-    def on(path, meth)
+    def on(path, meth, opts = {})
       logger.debug "#on called on #{actor_name}"
-      logger.debug "#{current_actor.class.name} is listening to: #{event_path(path)} with #{meth}"
-      subscribe(path, meth)
+      logger.debug "#{current_actor.class.name} is listening to: #{path_with_root(path)} with #{meth}"
+      subscribe(path_with_root(path), meth)
     end
 
     def trigger(path, opts = {})
@@ -90,11 +75,7 @@ module BarkingDog
     end
 
     def root_event_path
-      @root_event_path
-    end
-
-    def root_event_path=(str)
-      @root_event_path = str
+      BarkingDog.resources.root_event_path
     end
 
     def subscribe_to_class_events

@@ -22,6 +22,7 @@ module BarkingDog
 
     describe "updating the config" do
       let(:event_name) { "configuration_service/saved" }
+      let(:event_name_with_root) { "#{BarkingDog.resources.root_event_path}/#{event_name}"}
       let(:new_config) { {:foo => :bar} }
 
       before do
@@ -31,13 +32,13 @@ module BarkingDog
 
       it "should update configs on events" do
         val = @future.value(1)
-        val.first.should == event_name
+        val.first.should == event_name_with_root
         @config_service.configuration.should == new_config
       end
 
       it "should publish config changes" do
         val = @future.value(1)
-        val.first.should == event_name
+        val.first.should == event_name_with_root
         val.last.payload.should == new_config
       end
 

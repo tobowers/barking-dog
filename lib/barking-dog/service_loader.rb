@@ -10,18 +10,14 @@ module BarkingDog
   class ServiceLoader < Celluloid::SupervisionGroup
     include Celluloid::Notifications
 
-    class_attribute :root_event_path
-    self.root_event_path = "barking-dog"
-
     #supervise MyActor, :as => :my_actor
     #supervise AnotherActor, :as => :another_actor, :args => [{:start_working_right_now => true}]
     #pool MyWorker, :as => :my_worker_pool, :size => 5
 
-    attr_reader :registry, :event_publisher, :root_event_path
+    attr_reader :registry, :event_publisher
     attr_accessor :subscriptions
     def initialize
       @subscriptions = []
-      @root_event_path = self.class.root_event_path
       super
       @event_publisher = add_service(EventPublisher)
       subscribe_to_events
@@ -40,8 +36,7 @@ module BarkingDog
     # to any
     def root_event_path=(event_path)
       old_subs = subscriptions.dup
-      @root_event_path = event_path
-      reset_member_root_paths
+      BarkingDog.resources.root_event_path = event_path
       subscribe_to_events
       old_subs.each do |sub|
         unsubscribe(sub)
@@ -49,10 +44,8 @@ module BarkingDog
       self.subscriptions = subscriptions - old_subs
     end
 
-    def reset_member_root_paths
-      actors.each do |actor|
-        actor.root_event_path = root_event_path
-      end
+    def root_event_path
+      BarkingDog.resources.root_event_path
     end
 
     def termination_request(*args)
@@ -86,7 +79,7 @@ module BarkingDog
     end
 
     def on(path, meth)
-      subscriptions << subscribe(event_path(path), meth)
+      subscriptions << subscribe(event_path_with_root(path), meth)
     end
 
     def add_service(klass, *args, &block)
@@ -115,11 +108,10 @@ module BarkingDog
     end
 
     def subscribe_actor(actor)
-      actor.root_event_path = root_event_path
       actor.subscribe_to_class_events
     end
 
-    def event_path(path)
+    def event_path_with_root(path)
       "#{root_event_path}/#{path}"
     end
 

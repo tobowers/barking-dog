@@ -20,7 +20,7 @@ module BarkingDog
     it "should publish barking-dog.termination_request on stop" do
       @future = @receiver.future.wait_for("termination_request")
       @command_sender.write("stop")
-      @future.value(1).first.should == "termination_request"
+      @future.value(1).first.should == "barking-dog/termination_request"
     end
 
   end
