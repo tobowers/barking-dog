@@ -40,12 +40,6 @@ module BarkingDog
       subscribe(path_with_root(path), meth)
     end
 
-    def trigger(path, opts = {})
-      logger.debug "#{current_actor.class.name} is triggering: #{event_path(path)} with #{opts.inspect}"
-      path = event_path(path)
-      publish_with_event(path, opts)
-    end
-
     def event_path(path)
       logger.debug("event path for #{path} on #{current_actor}")
       if internal_root
@@ -55,6 +49,12 @@ module BarkingDog
         path = "#{root_event_path}/#{path}"
       end
       path
+    end
+
+    def trigger(path, opts = {})
+      logger.debug "#{current_actor.class.name} is triggering: #{event_path(path)} with #{opts.inspect}"
+      path = event_path(path)
+      publish_with_event(path, opts)
     end
 
     def root_trigger(path, opts = {})

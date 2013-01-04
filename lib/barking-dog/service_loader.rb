@@ -10,6 +10,7 @@ module BarkingDog
   class ServiceLoader < Celluloid::SupervisionGroup
     include Celluloid::Notifications
 
+    trap_exit :crash_logger
     #supervise MyActor, :as => :my_actor
     #supervise AnotherActor, :as => :another_actor, :args => [{:start_working_right_now => true}]
     #pool MyWorker, :as => :my_worker_pool, :size => 5
@@ -142,6 +143,10 @@ module BarkingDog
       load file_name
       logger.debug('setting up supervision again')
       supervise_as supervision_name.to_sym, actor_class
+    end
+
+    def crash_logger(actor, reason)
+      logger.debug("crash from service loader: #{actor.inspect}, for reason: #{reason.inspect}")
     end
 
   end

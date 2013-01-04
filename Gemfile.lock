@@ -26,14 +26,6 @@ GEM
       ffi
       ffi-rzmq
     coderay (1.0.8)
-    columnize (0.3.6)
-    debugger (1.2.2)
-      columnize (>= 0.3.1)
-      debugger-linecache (~> 1.1.1)
-      debugger-ruby_core_source (~> 1.1.5)
-    debugger-linecache (1.1.2)
-      debugger-ruby_core_source (>= 1.1.1)
-    debugger-ruby_core_source (1.1.5)
     diff-lcs (1.1.3)
     facter (1.6.16)
     ffi (1.2.0)
@@ -85,7 +77,6 @@ PLATFORMS
 DEPENDENCIES
   barking-dog!
   bundler (>= 1.0.0.rc.5)
-  debugger
   guard-rspec
   rb-fsevent (~> 0.9.1)
   rspec (> 2.0.0)

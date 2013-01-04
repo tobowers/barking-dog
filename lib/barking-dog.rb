@@ -20,6 +20,10 @@ module BarkingDog
     end
   end
 
+  def self.root_event_path
+    resources.root_event_path
+  end
+
   def self.resource_instance
     @resource_instance ||= BarkingDog::Resources.new
   end

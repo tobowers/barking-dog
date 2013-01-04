@@ -7,6 +7,22 @@ module BarkingDog
     before do
       class BaseService
         include BarkingDog::BasicService
+        class ExpectedTestError < StandardError; end
+        on "base_service/test_event", :handle_test_event
+
+        class_attribute :handled
+        self.handled = Queue.new
+
+        def handle_test_event(path, evt)
+          logger.debug "base service received: #{path} with #{evt.inspect}"
+          self.class.handled << [path, evt]
+
+          if evt.payload == "RAISE"
+            logger.debug "raising because of a RAISE payload in BaseService"
+            raise ExpectedTestError, evt.inspect
+          end
+        end
+
       end
     end
 
@@ -35,39 +51,35 @@ module BarkingDog
       @service_loader.registry[:"barking_dog/command_and_control_service"].ping.should == "pong"
     end
 
-    it "should add services" do
-      base_service = @service_loader.add_service(BaseService)
-      base_service.ping.should == "pong"
-    end
+    describe "independent services" do
 
-    describe "concurrent services" do
-      let(:base_service) { @service_loader.add_concurrent_service(BaseConcurrentService) }
+      let(:base_service) { @service_loader.add_service(BaseService) }
 
       before do
-        class BaseConcurrentService
-          include BarkingDog::BasicService
-          self.concurrency = 2
+        base_service #just call it to add the service
+      end
 
-          on "cool", :handle_cool
+      after do
+        base_service.terminate
+      end
 
-          class_attribute :cool_handler
-          self.cool_handler = Queue.new
+      it "should add services" do
+        base_service.ping.should == "pong"
+      end
 
-          def handle_cool(_, evt)
-            #self.class.cool_handler << evt
-          end
-
+      describe "when erroring" do
+        before do
+          base_service.trigger("test_event", payload: "RAISE")
         end
 
-        BaseConcurrentService.cool_handler.length.should == 0
+        it "should not get added to the handled" do
+          BaseService.handled.pop.last.payload.should == "RAISE"
+        end
+
       end
 
-      it "should add concurrent_services" do
-        pending "we do not use concurrent_services"
-        base_service.size.should == BaseConcurrentService.concurrency
-      end
+
     end
-
 
 
     describe "#root_event_path=" do
